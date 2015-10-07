@@ -153,14 +153,14 @@ Seq()
                 console.log("Adding %d rules to security group %s", rulesAdded, groupID);
 
 
-                    EC2.authorizeSecurityGroupIngress(params, function (err, data) {
-                        if (err) {
-                            _self(err);
-                            //console.log(err, err.stack);
-                        } else {
-                            _self();
-                        }
-                    });
+                EC2.authorizeSecurityGroupIngress(params, function (err, data) {
+                    if (err) {
+                        _self(err);
+                        //console.log(err, err.stack);
+                    } else {
+                        _self();
+                    }
+                });
 
             } else {
                 console.log('nothing to do for security group %s, all ip ranges present.', groupID);
