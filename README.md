@@ -3,6 +3,8 @@ node.js version: cloudfront-sg-njs
 
 This script updates one or more security groups to allow access from Amazon's cloudfront IP ranges.
 
+![CF](doc/assets/picture.png "cloudfront-sg-njs")
+
 It is possible to link cloudfront to an ELB or directly to your EC2 instances, so one can make of signed URL's and use CloudFront's caching capabilities and edge locations.
 
 However, this leaves a security hole as the EC2 or ELB has to have a public Ip/Dns. This allows clients to bypass cloudfront and directly execute requests against your EC2 instances.
@@ -21,12 +23,10 @@ Execute the following command to update the security group with appropriate rule
 # run in (default) dryrun mode for debugging or getting insight. no actual changes are performed.
 node cloudfront-sg.js sg-xxxxxxxx --region=aws-region-x --port 80
 
-
 # actually update the security group. default is interactive mode,
 # confirmation questions
 # will be asked
 node cloudfront-sg.js sg-xxxxxxxx --region=aws-region-x --port 80 --update
-
 
 # force update without any confirmation questions
 # (for use with crontab activation
@@ -72,9 +72,6 @@ Adding 8 rules to security group sg-811cc2e5
 skipped - dryrun mode; Request would have succeeded, but DryRun flag is set.
 
 done.
-
-
-
 ```
 
 ### Passing custom credentials
@@ -85,6 +82,22 @@ This is not recommended since the key and secret may be disclosed through the pr
 ```
 # use non-default access key and secret
 node cloudfront-sg.js sg-xxxxxxxx --region=aws-region-x --accesskey=XXXXX  --secret=YYYYYY --port 80 --port 443
+```
+
+### Installation
+
+Preconditions:
+
+* node and npm installed
+
+Pull the latest master branch from Git:
+```
+# pull repository from git
+cd /opt/local
+git clone https://github.com/24HOURSMEDIA/node-aws-cloudfront-sg
+cd node-aws-cloudfront-sg
+npm install
+node cloudfront-sg.js
 ```
 
 ### Disclaimer and notes
