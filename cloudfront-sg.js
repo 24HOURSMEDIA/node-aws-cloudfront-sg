@@ -14,12 +14,10 @@ var argv = require('optimist')
     .describe('s', 'The AWS Access key secret; omit to retrieve from default AWS config')
     .argv;
 
-
-
 var Seq = require('seq');
 var AWS = require('aws-sdk');
 
-// Set your region for future requests, and further aws credentials
+// Set your region and further aws credentials for uture requests
 AWS.config.update({
     region: argv.region,
     accessKeyId: argv.accesskey,
@@ -32,7 +30,8 @@ Seq()
     .seq(function () {
         this.vars.cloudFrontIps = [];
         this.vars.securityGroupIds = argv._;
-        this.vars.securityGroups = {};
+        this.vars.securityGroups = [];
+
 
         console.log('');
         console.log('Update AWS security groups %s with cloudfront IP\'s',  this.vars.securityGroupIds.join(','));
@@ -41,7 +40,7 @@ Seq()
         this();
     })
     // load cloudfront ips
-    .par(function () {
+    .seq(function () {
         var _self = this;
         var request = require("request");
         request('https://ip-ranges.amazonaws.com/ip-ranges.json', function (error, response, body) {
@@ -87,26 +86,24 @@ Seq()
                     }
                     return false;
                 };
-                _self.vars.securityGroups[securityGroup.GroupId] = securityGroup;
+                _self.vars.securityGroups.push(securityGroup);
                 console.log('loaded description of security group ' + securityGroup.GroupId);
             }
-            _self();
+            _self(null, _self.vars.securityGroups);
         });
     })
-    .seq(function () {
-        console.log('');
-        var _self = this;
-        // @see: http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/EC2.html#authorizeSecurityGroupIngress-property
-        for (var i in _self.vars.securityGroupIds) {
+    .flatten()
+    .parEach(function (securityGroup) {
+            var _self = this;
             var rulesAdded = 0;
-            var groupID =  _self.vars.securityGroupIds[i];
+            var groupID =  securityGroup.GroupId;
+            console.log('\nupdating security group %s', groupID);
             var params = {
                 DryRun: false,
                 GroupId: groupID,
                 IpPermissions: [
                 ]
             };
-
             // add allowance for port 80
             var port80Permissions = {
                 FromPort: 80,
@@ -116,8 +113,8 @@ Seq()
             };
 
             for (var ipPrefix in _self.vars.cloudFrontIps) {
-                if (_self.vars.securityGroups[groupID].hasIngressPermission('tcp', _self.vars.cloudFrontIps[ipPrefix], 80, 80)) {
-
+                if (securityGroup.hasIngressPermission('tcp', _self.vars.cloudFrontIps[ipPrefix], 80, 80)) {
+                    // skip ingress permission
                 } else {
                     port80Permissions.IpRanges.push({
                         CidrIp: _self.vars.cloudFrontIps[ipPrefix]
@@ -128,29 +125,6 @@ Seq()
             if (port80Permissions.IpRanges.length > 0) {
                 params.IpPermissions.push(port80Permissions);
             }
-
-            // add allowances for port 443 (ssl)
-            var port443Permissions = {
-                FromPort: 443,
-                ToPort: 443,
-                IpProtocol: 'TCP',
-                IpRanges: []
-            };
-
-            for (var ipPrefix in _self.vars.cloudFrontIps) {
-                if (_self.vars.securityGroups[groupID].hasIngressPermission('tcp', _self.vars.cloudFrontIps[ipPrefix], 443, 443)) {
-
-                } else {
-                    port443Permissions.IpRanges.push({
-                        CidrIp: _self.vars.cloudFrontIps[ipPrefix]
-                    });
-                    rulesAdded++;
-                }
-            }
-            if (port443Permissions.IpRanges.length > 0) {
-                params.IpPermissions.push(port443Permissions);
-            }
-
 
             if (rulesAdded > 0) {
                 console.log("Adding %d rules to security group %s", rulesAdded, groupID);
@@ -165,11 +139,11 @@ Seq()
                 console.log('nothing to do for security group %s, all ip ranges present.', groupID);
             }
 
-        }
-        _self();
+            this();
     }).seq(function () {
         console.log('');
         console.log('done');
     }).catch(function (err) {
         console.error(err.stack ? err.stack : err)
     });
+// end
