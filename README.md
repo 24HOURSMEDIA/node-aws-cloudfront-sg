@@ -47,7 +47,7 @@ node cloudfront-sg.js sg-xxxxxxxx --region=aws-region-x --port 80 --port 443
 
 ```
 
-### sample output
+### Sample output
 
 ```
 # node cloudfront-sg.js sg-811cc2e5 --region=eu-west-1 --force
