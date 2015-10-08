@@ -21,12 +21,10 @@ Execute the following command to update the security group with appropriate rule
 # run in (default) dryrun mode for debugging or getting insight. no actual changes are performed.
 node cloudfront-sg.js sg-xxxxxxxx --region=aws-region-x --port 80
 
-
 # actually update the security group. default is interactive mode,
 # confirmation questions
 # will be asked
 node cloudfront-sg.js sg-xxxxxxxx --region=aws-region-x --port 80 --update
-
 
 # force update without any confirmation questions
 # (for use with crontab activation
@@ -72,9 +70,6 @@ Adding 8 rules to security group sg-811cc2e5
 skipped - dryrun mode; Request would have succeeded, but DryRun flag is set.
 
 done.
-
-
-
 ```
 
 ### Passing custom credentials
