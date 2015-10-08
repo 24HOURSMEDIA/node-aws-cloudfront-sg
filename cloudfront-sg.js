@@ -2,17 +2,32 @@
 
 
 var argv = require('optimist')
-    .usage('Update AWS security groups with cloudfront IP\'s.\nUsage: $0 arg1..argn')
+    .usage('\nUpdate AWS security groups with cloudfront IP\'s.\n\nUsage: $0 arg1..argn')
     .demand(1)
     .describe('arg1..argn', 'One or more security group ID\'s')
+    .demand('r')
+    .alias('r','region')
+    .describe('r', 'The AWS Region (i.e. eu-west-1, etc)')
+    .alias('k', 'accesskey')
+    .describe('k', 'The AWS Access key; omit to retrieve from default AWS config')
+    .alias('s', 'secret')
+    .describe('s', 'The AWS Access key secret; omit to retrieve from default AWS config')
     .argv;
 
 argv.securityGroupsIds = argv._;
 
 var Seq = require('seq');
 var AWS = require('aws-sdk');
-// Set your region for future requests.
-AWS.config.region = 'eu-west-1';
+
+// Set your region for future requests, and further aws credentials
+AWS.config.update({
+    region: argv.region,
+    accessKeyId: argv.accesskey,
+    secretAccessKey: argv.secret
+});
+
+
+
 var EC2 = new AWS.EC2({apiVersion: '2015-10-01'});
 
 
