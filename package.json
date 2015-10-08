@@ -1,0 +1,25 @@
+{
+  "name": "cloudfront-sg-njs",
+  "version": "1.0.0",
+  "description": "updates AWS cloudfront security group with cloudfront ips",
+  "main": "cloudfront-sg.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies" : {
+    "optimist" : "0.6.1",
+    "seq" : "0.3.5",
+    "readline" : "1.1.0",
+    "aws-sdk" : "2.2.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/24HOURSMEDIA/cloudfront-sg-njs.git"
+  },
+  "author": "E Bachman / 24HOURSMEDIA",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/24HOURSMEDIA/cloudfront-sg-njs/issues"
+  },
+  "homepage": "https://github.com/24HOURSMEDIA/cloudfront-sg-njs#readme"
+}
