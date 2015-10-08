@@ -20,11 +20,27 @@ var argv = require('optimist')
     .alias('u', 'update')
     .default('u', false)
     .describe('u', 'set flag to actually update the security groups')
+    .boolean('force')
+    .default('force', false)
+    .describe('force', 'skip interactive and confirmation questions')
     .argv;
 
 var Seq = require('seq');
 var AWS = require('aws-sdk');
-
+var RL = require('readline').createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+RL.proceed = function(success,error) {
+    this.question('Proceed?',function(answer) {
+        console.log(answer);
+        if (answer == 'Y' || answer == 'y' || answer == 'YES' || answer == 'yes') {
+             success();
+        } else {
+            error();
+        }
+    });
+};
 
 if (argv.port.constructor !== Array) {
     argv.port = [argv.port];
@@ -36,22 +52,35 @@ AWS.config.update({
     accessKeyId: argv.accesskey,
     secretAccessKey: argv.secret
 });
-var EC2 = new AWS.EC2({apiVersion: '2015-10-01'});
+var EC2 = new AWS.EC2({apiVersion: '2015-10-01', maxRetries: 2});
 
 Seq()
     .seq(function () {
+        var _self = this;
         this.vars.cloudFrontIps = [];
         this.vars.securityGroupIds = argv._;
         this.vars.securityGroups = [];
         this.vars.ports = argv.port;
         this.vars.dryrun = !argv.update;
+        this.vars.hasError = false;
+        this.vars.force = argv.force;
 
         console.log('');
         console.log('Update AWS security groups %s with cloudfront IP\'s for ports %s', this.vars.securityGroupIds.join(', '), this.vars.ports.join(', '));
         console.log(this.vars.dryrun ? 'Running in DRYRUN mode' : 'Running in UPDATE mode');
         console.log('');
 
-        this();
+        if (!this.vars.force) {
+            RL.proceed(function() {
+                _self();
+            }, function() {
+                _self('aborted');
+            });
+        } else {
+            _self();
+        }
+
+
     })
     // load cloudfront ips
     .seq(function () {
@@ -112,6 +141,10 @@ Seq()
         var rulesAdded = 0;
         var groupID = securityGroup.GroupId;
         console.log('\nupdating security group %s with %d ip ranges', groupID,_self.vars.cloudFrontIps.length);
+
+
+
+
         var params = {
             DryRun: this.vars.dryrun,
             GroupId: groupID,
@@ -144,29 +177,52 @@ Seq()
         }
         if (rulesAdded > 0) {
             console.log("Adding %d rules to security group %s", rulesAdded, groupID);
-            EC2.authorizeSecurityGroupIngress(params, function (err, data) {
-                if (err) {
-                    if (err.code!='DryRunOperation') {
-                        console.error(err);
-                        _self();
+
+            var apply = function() {
+                EC2.authorizeSecurityGroupIngress(params, function (err, data) {
+                    if (err) {
+                        if (err.code != 'DryRunOperation') {
+                            console.error('Error: %s', err.message);
+                            _self.vars.hasError = true;
+                            _self();
+                        } else {
+                            // dryrun
+                            console.log('skipped - dryrun mode; ' + err.message);
+                            _self();
+                        }
                     } else {
-                        // dryrun
-                        console.log('skipped - dryrun mode; ' + err.message);
+                        console.log('OK');
                         _self();
                     }
-                } else {
-                    console.log('OK');
+                });
+            };
+
+
+            if (!this.vars.force) {
+                RL.proceed(function() {
+                    apply();
+                }, function() {
                     _self();
-                }
-            });
+                });
+            } else {
+                apply();
+            }
+
         } else {
             console.log('nothing to do for security group %s, all ip ranges present.', groupID);
             this();
         }
     }).seq(function () {
-        console.log('');
-        console.log('done');
+        if (this.vars.hasError) {
+            this('An error occurred');
+        } else {
+            console.log('');
+            console.log('done.');
+            RL.close();
+        }
     }).catch(function (err) {
-        console.error(err.stack ? err.stack : err)
+        console.error(err.stack ? err.stack : err);
+        RL.close();
     });
+
 // end
