@@ -25,20 +25,20 @@ AWS.config.update({
     accessKeyId: argv.accesskey,
     secretAccessKey: argv.secret
 });
-
-
-
 var EC2 = new AWS.EC2({apiVersion: '2015-10-01'});
 
 
-var cloudfrontIps = [];
 var securityGroups = {};
 
 Seq()
     .seq(function () {
+        this.vars.cloudFrontIps = [];
+
         console.log('');
+        console.log(this.vars);
         console.log('Update AWS security groups %s with cloudfront IP\'s', argv.securityGroupsIds.join(','));
         console.log('');
+
         this();
     })
     .par(function () {
@@ -51,10 +51,12 @@ Seq()
                 for (var prefixIndex in awsIps.prefixes) {
                     var prefix = awsIps.prefixes[prefixIndex];
                     if (prefix.service == 'CLOUDFRONT') {
-                        cloudfrontIps.push(prefix.ip_prefix);
+                        _self.vars.cloudFrontIps.push(prefix.ip_prefix);
                     }
                 }
-                console.log('loaded AWS IPs');
+                console.log('loaded AWS Cloudfront IPs');
+                console.log(_self.vars.cloudFrontIps.join(', '));
+                console.log('');
                 _self();
             } else {
                 _self("Couldn't load AWS IPS");
@@ -127,12 +129,12 @@ Seq()
                 IpRanges: []
             };
 
-            for (var ipPrefix in cloudfrontIps) {
-                if (securityGroups[groupID].hasIngressPermission('tcp', cloudfrontIps[ipPrefix], 80, 80)) {
+            for (var ipPrefix in _self.vars.cloudFrontIps) {
+                if (securityGroups[groupID].hasIngressPermission('tcp', _self.vars.cloudFrontIps[ipPrefix], 80, 80)) {
 
                 } else {
                     port80Permissions.IpRanges.push({
-                        CidrIp: cloudfrontIps[ipPrefix]
+                        CidrIp: _self.vars.cloudFrontIps[ipPrefix]
                     });
                     rulesAdded++;
                 }
@@ -149,12 +151,12 @@ Seq()
                 IpRanges: []
             };
 
-            for (var ipPrefix in cloudfrontIps) {
-                if (securityGroups[groupID].hasIngressPermission('tcp', cloudfrontIps[ipPrefix], 443, 443)) {
+            for (var ipPrefix in _self.vars.cloudFrontIps) {
+                if (securityGroups[groupID].hasIngressPermission('tcp', _self.vars.cloudFrontIps[ipPrefix], 443, 443)) {
 
                 } else {
                     port443Permissions.IpRanges.push({
-                        CidrIp: cloudfrontIps[ipPrefix]
+                        CidrIp: _self.vars.cloudFrontIps[ipPrefix]
                     });
                     rulesAdded++;
                 }
