@@ -16,6 +16,10 @@ var argv = require('optimist')
     .alias('p', 'port')
     .default('p', [80, 443])
     .describe('p', 'The ports to open for Cloudfront')
+    .boolean('u')
+    .alias('u', 'update')
+    .default('u', false)
+    .describe('u', 'set flag to actually update the security groups')
     .argv;
 
 var Seq = require('seq');
@@ -40,10 +44,12 @@ Seq()
         this.vars.securityGroupIds = argv._;
         this.vars.securityGroups = [];
         this.vars.ports = argv.port;
+        this.vars.dryrun = !argv.update;
 
 
         console.log('');
         console.log('Update AWS security groups %s with cloudfront IP\'s for ports %s', this.vars.securityGroupIds.join(', '), this.vars.ports.join(', '));
+        console.log(this.vars.dryrun ? 'Running in DRYRUN mode' : 'Running in UPDATE mode');
         console.log('');
 
         this();
@@ -103,20 +109,20 @@ Seq()
         });
     })
     .flatten()
-    .parEach(function (securityGroup) {
+    .seqFilter(function (securityGroup) {
         var _self = this;
         var rulesAdded = 0;
         var groupID = securityGroup.GroupId;
-        console.log('\nupdating security group %s', groupID);
+        console.log('\nupdating security group %s with %d ip ranges', groupID,_self.vars.cloudFrontIps.length);
         var params = {
-            DryRun: false,
+            DryRun: this.vars.dryrun,
             GroupId: groupID,
             IpPermissions: []
         };
         // add allowances for each ports
         for (var pI in this.vars.ports) {
             var port = this.vars.ports[pI];
-            console.log('adding rules for security group %s for port %d', groupID, port);
+            console.log('adding %d rules for security group %s for port %d', _self.vars.cloudFrontIps.length,groupID, port);
             var permissions = {
                 FromPort: port,
                 ToPort: port,
@@ -143,21 +149,30 @@ Seq()
             console.log("Adding %d rules to security group %s", rulesAdded, groupID);
             EC2.authorizeSecurityGroupIngress(params, function (err, data) {
                 if (err) {
-                    console.log('Error');
-                    //_self();
+                    //_self(err);
+                    if (data && data.code!='DryRunOperation') {
+                        console.log(err);
+                        _self();
+                    } else {
+                        // dryrun
+                        console.log('dryrun mode');
+                        _self();
+                    }
                 } else {
                     console.log('OK');
-                    //_self();
+                    _self();
                 }
             });
         } else {
             console.log('nothing to do for security group %s, all ip ranges present.', groupID);
-            //this();
+            this();
         }
     }).seq(function () {
         console.log('');
         console.log('done');
     }).catch(function (err) {
+        console.log('err');
         console.error(err.stack ? err.stack : err)
+
     });
 // end
