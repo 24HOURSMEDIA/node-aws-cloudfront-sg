@@ -82,6 +82,22 @@ This is not recommended since the key and secret may be disclosed through the pr
 node cloudfront-sg.js sg-xxxxxxxx --region=aws-region-x --accesskey=XXXXX  --secret=YYYYYY --port 80 --port 443
 ```
 
+### Installation
+
+Preconditions:
+
+* node and npm installed
+
+Pull the latest master branch from Git:
+```
+# pull repository from git
+cd /opt/local
+git clone https://github.com/24HOURSMEDIA/node-aws-cloudfront-sg
+cd node-aws-cloudfront-sg
+npm install
+node cloudfront-sg.js
+```
+
 ### Disclaimer and notes
 
 This software is experimental and does not guarantee 100% security.
