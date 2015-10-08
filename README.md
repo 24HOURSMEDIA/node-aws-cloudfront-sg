@@ -18,8 +18,8 @@ Then, make sure your AWS credentials has rights to modify and describe the secur
 Execute the following command to update the security group with appropriate rules:
 
 ```
-# run in dryrun mode for debugging or getting insight. no actual changes are performed.
-node cloudfront-sg.js sg-xxxxxxxx --region=aws-region-x --port 80 --dryrun
+# run in (default) dryrun mode for debugging or getting insight. no actual changes are performed.
+node cloudfront-sg.js sg-xxxxxxxx --region=aws-region-x --port 80
 
 
 # actually update the security group. default is interactive mode,
