@@ -46,7 +46,6 @@ Seq()
         this.vars.ports = argv.port;
         this.vars.dryrun = !argv.update;
 
-
         console.log('');
         console.log('Update AWS security groups %s with cloudfront IP\'s for ports %s', this.vars.securityGroupIds.join(', '), this.vars.ports.join(', '));
         console.log(this.vars.dryrun ? 'Running in DRYRUN mode' : 'Running in UPDATE mode');
@@ -60,7 +59,6 @@ Seq()
         var request = require("request");
         request('https://ip-ranges.amazonaws.com/ip-ranges.json', function (error, response, body) {
             if (!error && response.statusCode == 200) {
-                //   console.log(body) // Show the HTML for the Google homepage.
                 var awsIps = JSON.parse(response.body);
                 for (var prefixIndex in awsIps.prefixes) {
                     var prefix = awsIps.prefixes[prefixIndex];
@@ -129,7 +127,6 @@ Seq()
                 IpProtocol: 'TCP',
                 IpRanges: []
             };
-
             for (var ipPrefix in _self.vars.cloudFrontIps) {
                 if (securityGroup.hasIngressPermission('tcp', _self.vars.cloudFrontIps[ipPrefix], port, port)) {
                     // skip ingress permission
@@ -149,7 +146,6 @@ Seq()
             console.log("Adding %d rules to security group %s", rulesAdded, groupID);
             EC2.authorizeSecurityGroupIngress(params, function (err, data) {
                 if (err) {
-                    //_self(err);
                     if (err.code!='DryRunOperation') {
                         console.error(err);
                         _self();
