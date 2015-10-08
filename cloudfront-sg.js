@@ -157,7 +157,6 @@ Seq()
                 EC2.authorizeSecurityGroupIngress(params, function (err, data) {
                     if (err) {
                         _self(err);
-                        //console.log(err, err.stack);
                     } else {
                         _self();
                     }
