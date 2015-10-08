@@ -19,20 +19,42 @@ Execute the following command to update the security group with appropriate rule
 
 ```
 # run in dryrun mode for debugging or getting insight. no actual changes are performed.
-node cloudfront-sg.js sg-xxxxxxxx --port 80 --dryrun
+node cloudfront-sg.js sg-xxxxxxxx --region=aws-region-x --port 80 --dryrun
 
 
 # actually update the security group. default is interactive mode,
 # confirmation questions
 # will be asked
-node cloudfront-sg.js sg-xxxxxxxx --port 80 --update
+node cloudfront-sg.js sg-xxxxxxxx --region=aws-region-x --port 80 --update
 
 
 # force update without any confirmation questions
 # (for use with crontab activation
-node cloudfront-sg.js sg-xxxxxxxx --port 80 --update --force
+node cloudfront-sg.js sg-xxxxxxxx --region=aws-region-x --port 80 --update --force
 
+# update multiple security groups
+# (for use with crontab activation
+node cloudfront-sg.js sg-xxxxxxxx sg-yyyyyyyy --region=aws-region-x --port 80
 
+# update two security groups, one to allow port 80 http access,
+# and one to allow port 443 https access
+node cloudfront-sg.js sg-xxxxxxxx sg-xxxxxxxx --region=aws-region-x --port 80
+node cloudfront-sg.js sg-xxxxxxxx sg-yyyyyyyy --region=aws-region-x --port 80
+
+# update one security group with both port 80 and port 443 access
+# (NOT RECOMMENDED - a security group can have only 50 rules)
+node cloudfront-sg.js sg-xxxxxxxx --region=aws-region-x --port 80 --port 443
+
+```
+
+### passing custom credentials
+
+If your default profile or IAM role does not allow making changes to the security group, you can use a custom access key and secret.
+This is not recommended since the key and secret may be disclosed through the process list or command line history.
+
+```
+# use non-default access key and secret
+node cloudfront-sg.js sg-xxxxxxxx --region=aws-region-x --accesskey=XXXXX  --secret=YYYYYY --port 80 --port 443
 ```
 
 
