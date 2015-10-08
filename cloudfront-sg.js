@@ -150,12 +150,12 @@ Seq()
             EC2.authorizeSecurityGroupIngress(params, function (err, data) {
                 if (err) {
                     //_self(err);
-                    if (data && data.code!='DryRunOperation') {
-                        console.log(err);
+                    if (err.code!='DryRunOperation') {
+                        console.error(err);
                         _self();
                     } else {
                         // dryrun
-                        console.log('dryrun mode');
+                        console.log('skipped - dryrun mode; ' + err.message);
                         _self();
                     }
                 } else {
@@ -171,8 +171,6 @@ Seq()
         console.log('');
         console.log('done');
     }).catch(function (err) {
-        console.log('err');
         console.error(err.stack ? err.stack : err)
-
     });
 // end
