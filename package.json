@@ -10,6 +10,7 @@
     "optimist" : "0.6.1",
     "seq" : "0.3.5",
     "readline" : "1.1.0",
+    "request" : "2.64.0",
     "aws-sdk" : "2.2.7"
   },
   "repository": {
