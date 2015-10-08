@@ -92,6 +92,14 @@ Preconditions:
 
 * node and npm installed
 
+**using npm**
+
+```
+npm install node-aws-cloudfront-sg
+```
+
+**directly from git**
+
 Pull the latest master branch from Git:
 ```
 # pull repository from git
@@ -101,6 +109,9 @@ cd node-aws-cloudfront-sg
 npm install
 node cloudfront-sg.js
 ```
+
+
+
 
 ### Disclaimer and notes
 
