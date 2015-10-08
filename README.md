@@ -1,5 +1,5 @@
 # AWS CloudFront security group updater
-cloudfront-sg-njs
+node.js version: cloudfront-sg-njs
 
 This script updates one or more security groups to allow access from Amazon's cloudfront IP ranges.
 
