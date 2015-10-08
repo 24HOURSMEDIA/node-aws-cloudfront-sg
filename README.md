@@ -3,6 +3,8 @@ node.js version: cloudfront-sg-njs
 
 This script updates one or more security groups to allow access from Amazon's cloudfront IP ranges.
 
+[view the product webpage](http://www.24hoursmedia.com/2015/10/08/aws-cloudfront-elb-securitygroup/)
+
 ![CF](doc/assets/picture.png "cloudfront-sg-njs")
 
 It is possible to link cloudfront to an ELB or directly to your EC2 instances, so one can make of signed URL's and use CloudFront's caching capabilities and edge locations.
