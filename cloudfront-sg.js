@@ -112,7 +112,7 @@ Seq()
         };
         EC2.describeSecurityGroups(params, function (err, data) {
             if (err) {
-                _self(err);
+                return _self(err);
             }
             for (var j in data.SecurityGroups) {
                 var securityGroup = data.SecurityGroups[j];
