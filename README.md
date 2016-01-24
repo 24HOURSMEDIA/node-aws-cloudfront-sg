@@ -1,6 +1,22 @@
 # AWS CloudFront security group updater
 node.js version: cloudfront-sg-njs
 
+
+
+## This project is not actively maintained anymore.
+
+
+**AWS now seems to provide their own very similar lambda function, which also listens to an SNS topic 'AmazonIpSpaceChanged'.
+I feel AWS can provide better support. [see this page on git](https://github.com/awslabs/aws-cloudfront-samples/tree/master/update_security_groups_lambda)
+
+Additionally, it is now possible to add custom headers from Edge locations, allowing to pass a 'secret' and verify this in the backends: http://www.24hoursmedia.com/2016/01/23/protect-cloudfront-nginx/
+
+The combination of these two techniques would be very effective.
+
+**ot main
+
+
+
 This script updates one or more security groups to allow access from Amazon's cloudfront IP ranges.
 
 [view the product webpage](http://www.24hoursmedia.com/2015/10/08/aws-cloudfront-elb-securitygroup/)
