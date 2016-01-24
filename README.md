@@ -2,7 +2,7 @@
 node.js version: cloudfront-sg-njs
 
 
-
+* * *
 ## This project is not actively maintained anymore.
 
 
@@ -13,7 +13,9 @@ Additionally, it is now possible to add custom headers from Edge locations, allo
 
 The combination of these two techniques would be very effective.
 
-**ot main
+Thanks all for the interest.
+
+* * *
 
 
 
